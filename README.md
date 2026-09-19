@@ -22,36 +22,36 @@ OBS Controller 是一款 Android 的應用程式，可作為 OBS Studio 的全�
   <img src="./docs/StudioBridge-chat.png" width="250" />
 </p>
 
-## Features
+## 功能
 
-### 🎬 Scene Control
-Quickly switch between scenes while streaming or recording.
+### 🎬 場景控制
+在直播或錄影時快速切換場景。
 
-### 🧩 Source Management
-Add, remove, enable, or disable sources in real time to keep your production flexible and responsive.
+### 🧩 來源管理
+即時新增、移除、啟用或停用來源，讓您的製作保持彈性與靈活性。
 
-### 🎚️ Audio Control
-Control audio levels, mute or unmute sources, and manage your sound mix remotely.
+### 🎚️ 音訊控制
+控制音訊音量、將來源靜音或取消靜音，並遠端管理您的混音。
 
-### 🎛️ Audio & Video Filters
-Add, remove, and configure audio and video filters directly from your phone.  
-Adjust filter values in real time to fine-tune audio effects and video appearance without interrupting your stream.
+### 🎛️ 音訊與視訊濾鏡
+直接透過手機新增、移除及設定音訊和視訊濾鏡。
+即時調整濾鏡數值以微調音訊效果與視訊外觀，且不會中斷您的直播。
 
-### 📡 Remote Control
-Use your Android device as a reliable remote for OBS Studio, whether you're on the same network or connected remotely.
+### 📡 遠端控制
+將您的 Android 裝置作為 OBS Studio 可靠的遙控器，無論您是在同一個網路內還是進行遠端連線。
 
-## Use Cases
-- Live streaming
-- Content creation
-- Studio and multi-monitor setups
-- Live events and recordings
-- Remote stream control outside your local network
+## 使用情境
+- 實況直播
+- 內容創作
+- 工作室與多螢幕設置
+- 現場活動與錄影
+- 區域網路外的遠端直播控制
 
-## Connectivity
-OBS Controller can connect to OBS Studio in two ways:
-- **Local network connection** for low-latency control
-- **Remote connection** using port forwarding, allowing control from anywhere
+連線方式
+OBS Controller 可以透過兩種方式連線至 OBS Studio：
+- 區域網路連線：提供低延遲控制
+- 遠端連線：透過通訊埠轉發（Port Forwarding），允許從任何地方進行控制
 
-## Requirements
-- Android device
-- OBS Studio with WebSocket support enabled
+系統需求
+- Android 裝置
+- 已啟用 WebSocket 支援的 OBS Studio
