@@ -48,6 +48,12 @@ OBS Controller 是一款繁體中文 Android 的應用程式，
 ### 📡 遠端控制
 將您的 Android 裝置作為 OBS Studio 可靠的遙控器，無論您是在同一個網路內還是進行遠端連線。
 
+### 聊天室閱讀
+Twitch、Youtube 聊天室顯示。
+Text-to-Speech聊天訊息朗讀。
+Twitch 直播資訊 (觀看人數、直播時長) 顯示。
+Twitch 頻道公告、連續觀看紀錄、訂閱、揪團及其他特殊訊息顯示。
+
 ## 使用情境
 - 實況直播
 - 內容創作
