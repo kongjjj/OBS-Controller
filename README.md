@@ -1,6 +1,7 @@
 # OBS Controller
 <div align="center">
 OBS Controller 是一款 Android 的應用程式，可作為 OBS Studio 的全功能遙控器，讓您直接透過手機完整掌控直播或錄影。
+  
 專為實況主、內容創作者和工作室環境而設計，可讓您管理場景、來源、音訊和濾鏡，無需在直播過程中操作電腦。
 
 [![Twitch](https://img.shields.io/badge/Twitch-9146FF?style=for-the-badge&logo=twitch&logoColor=white)](https://twitch.tv)
