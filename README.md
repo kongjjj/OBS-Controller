@@ -21,7 +21,7 @@ OBS Controller 是一款 Android 的應用程式，可作為 OBS Studio 的全�
   <img src="./docs/StudioBridge-audiolvl.png" width="250" />
   <img src="./docs/StudioBridge-chat.png" width="250" />
 </p>
-
+</div>
 ## 功能
 
 ### 🎬 場景控制
