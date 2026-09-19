@@ -61,6 +61,4 @@ OBS Controller 可以透過兩種方式連線至 OBS Studio：
 - 區域網路連線：提供低延遲控制
 - 遠端連線：透過通訊埠轉發（Port Forwarding），允許從任何地方進行控制
 
-系統需求
-- Android 裝置
-- 已啟用 WebSocket 支援的 OBS Studio
+
