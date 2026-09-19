@@ -3,6 +3,12 @@
 OBS Controller is an Android app that acts as a full-featured remote control for OBS Studio, giving you complete control over your stream or recording directly from your phone.
 
 Built for streamers, content creators, and studio environments, OBS Controller lets you manage scenes, sources, audio, and filters without needing to interact with your PC during a live session.
+[![Twitch](https://img.shields.io/badge/Twitch-9146FF?style=for-the-badge&logo=twitch&logoColor=white)](https://twitch.tv)
+[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
+[![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/kongjjj/OBS-Controller)
+![GitHub top language](https://img.shields.io/github/languages/top/kongjjj/OBS-Controller?&style=for-the-badge)
+[![Release](https://img.shields.io/github/release/kongjjj/OBS-Controller?color=0000FF&label=Release&style=for-the-badge)](https://github.com/kongjjj/OBS-Controller/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/kongjjj/OBS-Controller/total?label=Downloads&style=for-the-badge&color=lightgreen)](https://github.com/kongjjj/OBS-Controller/releases)
 
 <p float="left">
   <img src="./docs/StudioBridge-login.png" width="250" />
