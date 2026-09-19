@@ -18,16 +18,7 @@ OBS Controller 是一款繁體中文 Android 的應用程式，
 [![Release](https://img.shields.io/github/release/kongjjj/OBS-Controller?color=0000FF&label=Release&style=for-the-badge)](https://github.com/kongjjj/OBS-Controller/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/kongjjj/OBS-Controller/total?label=Downloads&style=for-the-badge&color=lightgreen)](https://github.com/kongjjj/OBS-Controller/releases)
 
-<p float="left">
-  <img src="./docs/StudioBridge-login.png" width="250" />
-  <img src="./docs/StudioBridge-scenes.png" width="250" />
-  <img src="./docs/StudioBridge-mode.png" width="250" />
-</p>
-<p float="left">
-  <img src="./docs/StudioBridge-sources.png" width="250" />
-  <img src="./docs/StudioBridge-audiolvl.png" width="250" />
-  <img src="./docs/StudioBridge-chat.png" width="250" />
-</p>
+
 </div>
 
 ## 功能
