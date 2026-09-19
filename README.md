@@ -1,7 +1,7 @@
 
 <div align="center">
   
-<img src="pics/Logo.png" width="108" height="108" alt="Chat Overlay">
+<img src="pics/ic_launcher.webp" width="108" height="108" alt="OBS Controller">
 
 <h1>OBS Controller</h1>
 
