@@ -122,6 +122,8 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
     val ttsIgnoreLinks by vm.ttsIgnoreLinks.collectAsState()
     val ttsIgnoreEmotes by vm.ttsIgnoreEmotes.collectAsState()
     val ttsLanguage by vm.ttsLanguage.collectAsState()
+    val showMessageTime by vm.showMessageTime.collectAsState()
+    val showExpandButton by vm.showExpandButton.collectAsState()
 
     val isConnected = state is ConnectionState.Connected
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -165,6 +167,8 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
             chatEmoteSize = chatEmoteSize,
             chatUsernameSize = chatUsernameSize,
             animatedEmotes = animatedEmotes,
+            showMessageTime = showMessageTime,
+            showExpandButton = showExpandButton,
             showDebugBar = showDebugBar,
             showEmoteDebug = showEmoteDebug,
             enable7tv = enable7tv,
@@ -177,6 +181,8 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
             onEmoteSizeChange = { vm.setChatEmoteSize(it) },
             onUsernameSizeChange = { vm.setChatUsernameSize(it) },
             onAnimatedEmotesChange = { vm.setAnimatedEmotes(it) },
+            onShowMessageTimeChange = { vm.setShowMessageTime(it) },
+            onShowExpandButtonChange = { vm.setShowExpandButton(it) },
             onShowDebugBarChange = { vm.setShowDebugBar(it) },
             onShowEmoteDebugChange = { vm.setShowEmoteDebug(it) },
             onEnable7tvChange = { vm.setEnable7tv(it) },
@@ -400,6 +406,8 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
                         chatEmoteSize = chatEmoteSize,
                         chatUsernameSize = chatUsernameSize,
                         animatedEmotes = animatedEmotes,
+                        showMessageTime = showMessageTime,
+                        showExpandButton = showExpandButton,
                         showDebugBar = showDebugBar,
                         showEmoteDebug = showEmoteDebug,
                         viewerCount = twitchViewerCount,

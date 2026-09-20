@@ -73,6 +73,12 @@ class ProfileStore(context: Context) {
     fun getShowMiniMixer(): Boolean = prefs.getBoolean("show_mini_mixer", true)
     fun setShowMiniMixer(enabled: Boolean) = prefs.edit { putBoolean("show_mini_mixer", enabled) }
 
+    fun getShowMessageTime(): Boolean = prefs.getBoolean("show_message_time", false)
+    fun setShowMessageTime(enabled: Boolean) = prefs.edit { putBoolean("show_message_time", enabled) }
+
+    fun getShowExpandButton(): Boolean = prefs.getBoolean("show_expand_button", true)
+    fun setShowExpandButton(enabled: Boolean) = prefs.edit { putBoolean("show_expand_button", enabled) }
+
     fun getFilterMiniMixerByScene(): Boolean = prefs.getBoolean("filter_mini_mixer_by_scene", false)
     fun setFilterMiniMixerByScene(enabled: Boolean) = prefs.edit { putBoolean("filter_mini_mixer_by_scene", enabled) }
 

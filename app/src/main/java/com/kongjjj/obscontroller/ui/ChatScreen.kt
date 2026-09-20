@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -42,6 +43,9 @@ import com.kongjjj.obscontroller.ChatMessage
 import com.kongjjj.obscontroller.MessageType
 import com.kongjjj.obscontroller.getLocalizedSystemMessage
 import com.kongjjj.obscontroller.parseMessageSegments
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @Composable
@@ -58,6 +62,8 @@ fun ChatScreen(
     chatEmoteSize: Float,
     chatUsernameSize: Float,
     animatedEmotes: Boolean,
+    showMessageTime: Boolean,
+    showExpandButton: Boolean,
     showDebugBar: Boolean,
     showEmoteDebug: Boolean,
     viewerCount: Int?,
@@ -89,15 +95,16 @@ fun ChatScreen(
     // a new message is added, before the LaunchedEffect can read the layout.
     val isAtBottom by remember {
         derivedStateOf {
-            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
             val total = listState.layoutInfo.totalItemsCount
-            // Use a larger threshold (20) to make auto-scroll more stable during high message volume
-            total == 0 || lastVisible >= total - 20
+            if (total == 0) return@derivedStateOf true
+            val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+            // Use a threshold of 2 to be more lenient, plus check if we're basically at the end
+            lastVisible >= total - 2
         }
     }
     LaunchedEffect(chatMessages.size) {
         if (isAtBottom && chatMessages.isNotEmpty()) {
-            listState.scrollToItem(chatMessages.size - 1)
+            listState.animateScrollToItem(chatMessages.size) // scroll to end of combined list
         }
     }
 
@@ -241,9 +248,7 @@ fun ChatScreen(
                             )
                         }
                     }
-                    if (!chatConnected) {
-                        TextButton(onClick = onConnect) { Text("Reconnect") }
-                    }
+                    // Reconnect button removed as per user request (handled by auto-reconnect)
                 }
             }
             HorizontalDivider()
@@ -272,22 +277,50 @@ fun ChatScreen(
                 )
             }
         } else {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(vertical = 4.dp)
-            ) {
-                items(combinedMessages, key = { it.id }) { msg ->
-                    ChatMessageRow(
-                        message = msg,
-                        thirdPartyEmotes = thirdPartyEmotes,
-                        twitchBadges = twitchBadges,
-                        fontSize = chatFontSize,
-                        lineSpacing = chatLineSpacing,
-                        emoteSize = chatEmoteSize,
-                        usernameSize = chatUsernameSize,
-                        imageLoader = imageLoader
-                    )
+            Box(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(vertical = 4.dp)
+                ) {
+                    items(combinedMessages, key = { it.id }) { msg ->
+                        ChatMessageRow(
+                            message = msg,
+                            thirdPartyEmotes = thirdPartyEmotes,
+                            twitchBadges = twitchBadges,
+                            fontSize = chatFontSize,
+                            lineSpacing = chatLineSpacing,
+                            emoteSize = chatEmoteSize,
+                            usernameSize = chatUsernameSize,
+                            showMessageTime = showMessageTime,
+                            imageLoader = imageLoader
+                        )
+                    }
+                }
+
+                if (showExpandButton) {
+                    val scope = rememberCoroutineScope()
+                    IconButton(
+                        onClick = {
+                            scope.launch {
+                                listState.scrollToItem(combinedMessages.size - 1)
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(16.dp)
+                            .size(40.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ExpandMore,
+                            contentDescription = "Jump to latest",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
@@ -303,10 +336,18 @@ private fun ChatMessageRow(
     lineSpacing: Float,
     emoteSize: Float,
     usernameSize: Float,
+    showMessageTime: Boolean,
     imageLoader: ImageLoader
 ) {
     val badgeSize = (fontSize * 1.1f).sp
     val emoteSizeSp = emoteSize.sp
+
+    val timeFormatter = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
+    val timeStr = remember(message.timestamp) {
+        val ts = message.timestamp
+        if (ts != null) timeFormatter.format(Date(ts)) else ""
+    }
+    val timeColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
 
     val defaultColor = MaterialTheme.colorScheme.primary
     val secondaryColor = MaterialTheme.colorScheme.secondary
@@ -412,7 +453,7 @@ private fun ChatMessageRow(
         }
     }
 
-    val annotatedText = remember(message.id, thirdPartyEmotes.size, twitchBadges.size, nameColor, usernameSize, message.systemMsg, secondaryColor) {
+    val annotatedText = remember(message.id, thirdPartyEmotes.size, twitchBadges.size, nameColor, usernameSize, message.systemMsg, secondaryColor, showMessageTime, timeStr, timeColor) {
         buildAnnotatedString {
             val localizedSystemMsg = message.getLocalizedSystemMessage()
             if (message.type == MessageType.USER_NOTICE && localizedSystemMsg.isNotEmpty()) {
@@ -421,6 +462,16 @@ private fun ChatMessageRow(
                 }
                 if (message.message.isNotEmpty()) {
                     append("\n")
+                }
+            }
+
+            if (showMessageTime && timeStr.isNotEmpty()) {
+                withStyle(SpanStyle(
+                    color = timeColor,
+                    fontSize = (fontSize * 0.85f).sp
+                )) {
+                    append(timeStr)
+                    append(" ")
                 }
             }
 

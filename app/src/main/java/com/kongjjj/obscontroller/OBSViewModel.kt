@@ -180,6 +180,12 @@ class OBSViewModel(app: Application) : AndroidViewModel(app) {
     private val _animatedEmotes = MutableStateFlow(store.getAnimatedEmotes())
     val animatedEmotes: StateFlow<Boolean> = _animatedEmotes
 
+    private val _showMessageTime = MutableStateFlow(store.getShowMessageTime())
+    val showMessageTime: StateFlow<Boolean> = _showMessageTime
+
+    private val _showExpandButton = MutableStateFlow(store.getShowExpandButton())
+    val showExpandButton: StateFlow<Boolean> = _showExpandButton
+
     private val _showDebugBar = MutableStateFlow(store.getShowDebugBar())
     val showDebugBar: StateFlow<Boolean> = _showDebugBar
 
@@ -664,6 +670,8 @@ class OBSViewModel(app: Application) : AndroidViewModel(app) {
     fun setChatEmoteSize(sp: Float) { store.setChatEmoteSize(sp); _chatEmoteSize.value = sp }
     fun setChatUsernameSize(sp: Float) { store.setChatUsernameSize(sp); _chatUsernameSize.value = sp }
     fun setAnimatedEmotes(enabled: Boolean) { store.setAnimatedEmotes(enabled); _animatedEmotes.value = enabled }
+    fun setShowMessageTime(enabled: Boolean) { store.setShowMessageTime(enabled); _showMessageTime.value = enabled }
+    fun setShowExpandButton(enabled: Boolean) { store.setShowExpandButton(enabled); _showExpandButton.value = enabled }
     fun setShowDebugBar(enabled: Boolean) { store.setShowDebugBar(enabled); _showDebugBar.value = enabled }
     fun setShowEmoteDebug(enabled: Boolean) { store.setShowEmoteDebug(enabled); _showEmoteDebug.value = enabled }
     fun setShowMiniMixer(enabled: Boolean) { store.setShowMiniMixer(enabled); _showMiniMixer.value = enabled }
@@ -717,6 +725,8 @@ class OBSViewModel(app: Application) : AndroidViewModel(app) {
                         _chatEmoteSize.value = store.getChatEmoteSize()
                         _chatUsernameSize.value = store.getChatUsernameSize()
                         _animatedEmotes.value = store.getAnimatedEmotes()
+                        _showMessageTime.value = store.getShowMessageTime()
+                        _showExpandButton.value = store.getShowExpandButton()
                         _showDebugBar.value = store.getShowDebugBar()
                         _enable7tv.value = store.getEnable7tv()
                         _enableBttv.value = store.getEnableBttv()

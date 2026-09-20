@@ -14,7 +14,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.kongjjj.obscontroller.BuildConfig
 import com.kongjjj.obscontroller.DEFAULT_EMOTE_SIZE
 import com.kongjjj.obscontroller.DEFAULT_FONT_SIZE
 import com.kongjjj.obscontroller.DEFAULT_LINE_SPACING
@@ -30,6 +32,8 @@ fun SettingsDialog(
     chatEmoteSize: Float,
     chatUsernameSize: Float,
     animatedEmotes: Boolean,
+    showMessageTime: Boolean,
+    showExpandButton: Boolean,
     showDebugBar: Boolean,
     showEmoteDebug: Boolean,
     enable7tv: Boolean,
@@ -46,6 +50,8 @@ fun SettingsDialog(
     onEmoteSizeChange: (Float) -> Unit,
     onUsernameSizeChange: (Float) -> Unit,
     onAnimatedEmotesChange: (Boolean) -> Unit,
+    onShowMessageTimeChange: (Boolean) -> Unit,
+    onShowExpandButtonChange: (Boolean) -> Unit,
     onShowDebugBarChange: (Boolean) -> Unit,
     onShowEmoteDebugChange: (Boolean) -> Unit,
     onEnable7tvChange: (Boolean) -> Unit,
@@ -273,6 +279,44 @@ fun SettingsDialog(
                     )
                 }
 
+                // ── Show message time ──────────────────────────────────────
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                        Text("顯示留言時間", style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("在留言內容前顯示發送時間",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                    }
+                    Switch(
+                        checked = showMessageTime,
+                        onCheckedChange = onShowMessageTimeChange
+                    )
+                }
+
+                // ── Show jump to latest button ─────────────────────────────
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                        Text("顯示跳到最新按鈕", style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("在聊天室右上角顯示跳到最新留言的按鈕",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                    }
+                    Switch(
+                        checked = showExpandButton,
+                        onCheckedChange = onShowExpandButtonChange
+                    )
+                }
+
                 // ── Debug status bar ───────────────────────────────────────
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -497,6 +541,16 @@ fun SettingsDialog(
                         Switch(checked = ttsIgnoreEmotes, onCheckedChange = onTtsIgnoreEmotesChange)
                     }
                 }
+
+                HorizontalDivider()
+
+                Text(
+                    text = "@2026 kongjjj  Version ${BuildConfig.VERSION_NAME}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                )
             }
         },
         confirmButton = {
