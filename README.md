@@ -56,4 +56,13 @@ OBS Controller 可以透過兩種方式連線至 OBS Studio：
 - 區域網路連線：提供低延遲控制
 - 遠端連線：透過通訊埠轉發（Port Forwarding），允許從任何地方進行控制
 
+## 安裝方法
+我會在 [GitHub releases](https://github.com/kongjjj/OBS-Controller/releases) 內發布最新 .apk 檔案。
+
+可以在手機上開啟 GitHub 發行頁面，下載 .apk 檔案並安裝。 
+
+---
+
+## 我製作的其他程式
+- [Chat-Overlay](https://github.com/kongjjj/Chat-Overlay)：一個Android透明 Youtube/Twitch聊天室overlay給直播使用。。 
 
