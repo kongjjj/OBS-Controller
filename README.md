@@ -23,8 +23,12 @@ OBS Controller 是一款繁體中文 Android 的應用程式，可作為 OBS Stu
 
 ---
 
+<div align="center">
+  
 ![OBS-Controller](pics/Screenshot_1.jpg)
 ![OBS-Controller](pics/Screenshot_2.jpg) 
+
+</div>
 
 ## 功能
 
