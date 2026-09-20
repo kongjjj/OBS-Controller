@@ -65,4 +65,4 @@ OBS Controller 可以透過兩種方式連線至 OBS Studio：
 
 ## 我製作的其他程式
 - [Chat-Overlay](https://github.com/kongjjj/Chat-Overlay)：一個Android透明 Youtube/Twitch聊天室overlay給直播使用。。 
-
+- [Live Streaming Camera](https://github.com/kongjjj/Live-Streaming-Camera)：一個使用中文製作的Android直播程式。 
