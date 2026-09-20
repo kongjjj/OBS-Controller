@@ -42,11 +42,8 @@ OBS Controller 是一款繁體中文 Android 的應用程式，可作為 OBS Stu
 
 ### 💬 聊天室閱讀
 - Twitch、Youtube 聊天室顯示。
-
 - Text-to-Speech聊天訊息朗讀。
-
 - Twitch 直播資訊 (觀看人數、直播時長) 顯示。
-
 - Twitch 頻道公告、連續觀看紀錄、訂閱、揪團及其他特殊訊息顯示。
 
 ## 使用情境
