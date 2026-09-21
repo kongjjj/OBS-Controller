@@ -15,6 +15,7 @@ data class ChatMessage(
     val announcementColor: String? = null,
     val systemMsg: String? = null,
     val bits: Int = 0,
+    val isHighlighted: Boolean = false,
     val twitchMsgId: String? = null,
     val msgParams: Map<String, String> = emptyMap(),
 )

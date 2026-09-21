@@ -98,13 +98,8 @@ fun ChatScreen(
             val total = listState.layoutInfo.totalItemsCount
             if (total == 0) return@derivedStateOf true
             val lastVisible = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
-            // Use a threshold of 2 to be more lenient, plus check if we're basically at the end
-            lastVisible >= total - 2
-        }
-    }
-    LaunchedEffect(chatMessages.size) {
-        if (isAtBottom && chatMessages.isNotEmpty()) {
-            listState.animateScrollToItem(chatMessages.size) // scroll to end of combined list
+            // Use a threshold of 25 to allow auto-scroll when user is near the bottom
+            lastVisible >= total - 25
         }
     }
 
@@ -131,6 +126,12 @@ fun ChatScreen(
     val combinedMessages = remember(chatMessages) {
         if (chatMessages.isEmpty()) listOf(systemInstruction)
         else listOf(systemInstruction) + chatMessages
+    }
+
+    LaunchedEffect(chatMessages) {
+        if (isAtBottom && chatMessages.isNotEmpty()) {
+            listState.scrollToItem(combinedMessages.size - 1)
+        }
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -358,9 +359,10 @@ private fun ChatMessageRow(
         } else defaultColor
     }
 
-    // Special message styling (Announcements & UserNotices & Bits)
-    val announcementBgColor = remember(message.type, message.announcementColor, message.bits) {
+    // Special message styling (Announcements & UserNotices & Bits & Highlights)
+    val announcementBgColor = remember(message.type, message.announcementColor, message.bits, message.isHighlighted) {
         when {
+            message.isHighlighted -> Color(0xFFFFD700).copy(alpha = 0.15f) // Gold for Highlights
             message.type == MessageType.ANNOUNCEMENT -> {
                 when (message.announcementColor?.uppercase()) {
                     "BLUE" -> Color(0xFF00ADFF).copy(alpha = 0.15f)
@@ -377,8 +379,9 @@ private fun ChatMessageRow(
             else -> null
         }
     }
-    val announcementBorderColor = remember(message.type, message.announcementColor, message.bits) {
+    val announcementBorderColor = remember(message.type, message.announcementColor, message.bits, message.isHighlighted) {
         when {
+            message.isHighlighted -> Color(0xFFFFD700)
             message.type == MessageType.ANNOUNCEMENT -> {
                 when (message.announcementColor?.uppercase()) {
                     "BLUE" -> Color(0xFF00ADFF)
@@ -456,11 +459,14 @@ private fun ChatMessageRow(
     val annotatedText = remember(message.id, thirdPartyEmotes.size, twitchBadges.size, nameColor, usernameSize, message.systemMsg, secondaryColor, showMessageTime, timeStr, timeColor) {
         buildAnnotatedString {
             val localizedSystemMsg = message.getLocalizedSystemMessage()
-            if (message.type == MessageType.USER_NOTICE && localizedSystemMsg.isNotEmpty()) {
+            val isUserNotice = message.type == MessageType.USER_NOTICE
+            val hasUserMessage = message.message.isNotEmpty()
+
+            if (isUserNotice && localizedSystemMsg.isNotEmpty()) {
                 withStyle(SpanStyle(fontWeight = FontWeight.Bold, color = secondaryColor)) {
                     append("✦ $localizedSystemMsg")
                 }
-                if (message.message.isNotEmpty()) {
+                if (hasUserMessage) {
                     append("\n")
                 }
             }
@@ -474,6 +480,9 @@ private fun ChatMessageRow(
                     append(" ")
                 }
             }
+
+            // Skip name and badges for UserNotice with no message (redundant info)
+            if (isUserNotice && !hasUserMessage) return@buildAnnotatedString
 
             if (message.platform == "youtube" || message.platform == "twitch") {
                 appendInlineContent("platform_icon", "[${message.platform}]")

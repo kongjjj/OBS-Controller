@@ -139,6 +139,7 @@ class TwitchChatClient {
             var announcementColor: String? = null
             var systemMsg: String? = null
             var bits = 0
+            var isHighlighted = false
             var twitchMsgId: String? = null
             val msgParams = mutableMapOf<String, String>()
 
@@ -166,6 +167,7 @@ class TwitchChatClient {
                         "msg-id"          -> {
                             twitchMsgId = value
                             if (value == "announcement") msgType = MessageType.ANNOUNCEMENT
+                            else if (value == "highlighted-message") isHighlighted = true
                             else if (line.contains("USERNOTICE")) msgType = MessageType.USER_NOTICE
                         }
                         "msg-param-color" -> if (value.isNotEmpty()) announcementColor = value
@@ -247,6 +249,7 @@ class TwitchChatClient {
                 announcementColor = announcementColor,
                 systemMsg         = systemMsg,
                 bits              = bits,
+                isHighlighted     = isHighlighted,
                 twitchMsgId       = twitchMsgId,
                 msgParams         = msgParams
             )
