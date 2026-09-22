@@ -1,5 +1,6 @@
 package com.kongjjj.obscontroller.ui
 
+import android.app.Activity
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,9 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.kongjjj.obscontroller.BuildConfig
 import com.kongjjj.obscontroller.DEFAULT_EMOTE_SIZE
 import com.kongjjj.obscontroller.DEFAULT_FONT_SIZE
@@ -34,6 +38,8 @@ fun SettingsDialog(
     animatedEmotes: Boolean,
     showMessageTime: Boolean,
     showExpandButton: Boolean,
+    showFullScreenButton: Boolean,
+    showScreenLockButton: Boolean,
     showDebugBar: Boolean,
     showEmoteDebug: Boolean,
     enable7tv: Boolean,
@@ -52,6 +58,8 @@ fun SettingsDialog(
     onAnimatedEmotesChange: (Boolean) -> Unit,
     onShowMessageTimeChange: (Boolean) -> Unit,
     onShowExpandButtonChange: (Boolean) -> Unit,
+    onShowFullScreenButtonChange: (Boolean) -> Unit,
+    onShowScreenLockButtonChange: (Boolean) -> Unit,
     onShowDebugBarChange: (Boolean) -> Unit,
     onShowEmoteDebugChange: (Boolean) -> Unit,
     onEnable7tvChange: (Boolean) -> Unit,
@@ -76,8 +84,20 @@ fun SettingsDialog(
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val view = LocalView.current
+
     var channelInput by remember(twitchChannel) { mutableStateOf(twitchChannel) }
     var youtubeInput by remember(youtubeChannelId) { mutableStateOf(youtubeChannelId) }
+
+    fun hideKeyboard() {
+        focusManager.clearFocus()
+        keyboardController?.hide()
+        // Fallback for some devices/scenarios
+        val window = (context as? Activity)?.window
+        if (window != null) {
+            WindowCompat.getInsetsController(window, view).hide(WindowInsetsCompat.Type.ime())
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -104,19 +124,17 @@ fun SettingsDialog(
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                             keyboardActions = KeyboardActions(onDone = {
+                                hideKeyboard()
                                 val trimmed = channelInput.trim().lowercase()
                                 onSaveChannel(trimmed)
-                                focusManager.clearFocus()
-                                keyboardController?.hide()
                                 Toast.makeText(context, "已儲存", Toast.LENGTH_SHORT).show()
                             })
                         )
                         FilledTonalButton(
                             onClick = {
+                                hideKeyboard()
                                 val trimmed = channelInput.trim().lowercase()
                                 onSaveChannel(trimmed)
-                                focusManager.clearFocus()
-                                keyboardController?.hide()
                                 Toast.makeText(context, "已儲存", Toast.LENGTH_SHORT).show()
                             }
                         ) { Text("儲存") }
@@ -139,19 +157,17 @@ fun SettingsDialog(
                             modifier = Modifier.weight(1f),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                             keyboardActions = KeyboardActions(onDone = {
+                                hideKeyboard()
                                 val trimmed = youtubeInput.trim()
                                 onSaveYoutubeChannelId(trimmed)
-                                focusManager.clearFocus()
-                                keyboardController?.hide()
                                 Toast.makeText(context, "已儲存", Toast.LENGTH_SHORT).show()
                             })
                         )
                         FilledTonalButton(
                             onClick = {
+                                hideKeyboard()
                                 val trimmed = youtubeInput.trim()
                                 onSaveYoutubeChannelId(trimmed)
-                                focusManager.clearFocus()
-                                keyboardController?.hide()
                                 Toast.makeText(context, "已儲存", Toast.LENGTH_SHORT).show()
                             }
                         ) { Text("儲存") }
@@ -159,6 +175,10 @@ fun SettingsDialog(
                 }
 
                 HorizontalDivider()
+
+                // ── Font Settings Section ──────────────────────────────────
+                Text("字型設定", style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary)
 
                 // ── Font size ──────────────────────────────────────────────
                 Column {
@@ -260,22 +280,26 @@ fun SettingsDialog(
 
                 HorizontalDivider()
 
-                // ── Animated emotes ────────────────────────────────────────
+                // ── Chatroom Settings Section ──────────────────────────────
+                Text("聊天室設定", style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary)
+
+                // ── Debug status bar ───────────────────────────────────────
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                        Text("動態表情符號", style = MaterialTheme.typography.labelMedium,
+                        Text("顯示觀看人數與直播時間", style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("將 GIF 顯示為動態圖片",
+                        Text("在聊天室標題顯示即時人數與開播時長",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
                     }
                     Switch(
-                        checked = animatedEmotes,
-                        onCheckedChange = onAnimatedEmotesChange
+                        checked = showDebugBar,
+                        onCheckedChange = onShowDebugBarChange
                     )
                 }
 
@@ -298,6 +322,31 @@ fun SettingsDialog(
                     )
                 }
 
+                // ── Animated emotes ────────────────────────────────────────
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                        Text("動態表情符號", style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("將 GIF 顯示為動態圖片",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                    }
+                    Switch(
+                        checked = animatedEmotes,
+                        onCheckedChange = onAnimatedEmotesChange
+                    )
+                }
+
+                HorizontalDivider()
+
+                // ── Button Switches Section ────────────────────────────────
+                Text("按鈕開關", style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary)
+
                 // ── Show jump to latest button ─────────────────────────────
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -317,24 +366,48 @@ fun SettingsDialog(
                     )
                 }
 
-                // ── Debug status bar ───────────────────────────────────────
+                // ── Show full screen button ────────────────────────────────
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
-                        Text("顯示觀看人數與直播時間", style = MaterialTheme.typography.labelMedium,
+                        Text("顯示全螢幕按鈕", style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("在聊天室標題顯示即時人數與開播時長",
+                        Text("在聊天室右上角顯示隱藏導覽列的按鈕",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
                     }
                     Switch(
-                        checked = showDebugBar,
-                        onCheckedChange = onShowDebugBarChange
+                        checked = showFullScreenButton,
+                        onCheckedChange = onShowFullScreenButtonChange
                     )
                 }
+
+                // ── Show screen lock button ────────────────────────────────
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                        Text("顯示聊天鎖定按鈕", style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("在聊天室右上角顯示鎖定聊天螢幕防止觸控的按鈕",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                    }
+                    Switch(
+                        checked = showScreenLockButton,
+                        onCheckedChange = onShowScreenLockButtonChange
+                    )
+                }
+
+                HorizontalDivider()
+
+                // ── Debug status bar ───────────────────────────────────────
+                // Moved up to Chatroom Settings Section
 
                 // ── Emote Debug Bar ────────────────────────────────────────
                 Row(
@@ -358,8 +431,8 @@ fun SettingsDialog(
                 HorizontalDivider()
 
                 // ── Scenes tab UI ──────────────────────────────────────────
-                Text("場景分頁設定", style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("場景分頁設定", style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -411,8 +484,8 @@ fun SettingsDialog(
                 HorizontalDivider()
 
                 // ── Audio tab settings ───────────────────────────────────────
-                Text("音效分頁設定", style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("音效分頁設定", style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -432,8 +505,8 @@ fun SettingsDialog(
                 HorizontalDivider()
 
                 // ── Emote providers ────────────────────────────────────────
-                Text("表情符號來源", style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("表情符號來源", style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -465,8 +538,8 @@ fun SettingsDialog(
                 HorizontalDivider()
 
                 // ── TTS ──────────────────────────────────────────────
-                Text("語音輸出 (TTS)", style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("語音輸出 (TTS)", style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary)
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),

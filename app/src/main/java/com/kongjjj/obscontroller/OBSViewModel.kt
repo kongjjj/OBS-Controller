@@ -186,6 +186,18 @@ class OBSViewModel(app: Application) : AndroidViewModel(app) {
     private val _showExpandButton = MutableStateFlow(store.getShowExpandButton())
     val showExpandButton: StateFlow<Boolean> = _showExpandButton
 
+    private val _showFullScreenButton = MutableStateFlow(store.getShowFullScreenButton())
+    val showFullScreenButton: StateFlow<Boolean> = _showFullScreenButton
+
+    private val _showScreenLockButton = MutableStateFlow(store.getShowScreenLockButton())
+    val showScreenLockButton: StateFlow<Boolean> = _showScreenLockButton
+
+    private val _fullScreenActive = MutableStateFlow(store.getFullScreenActive())
+    val fullScreenActive: StateFlow<Boolean> = _fullScreenActive
+
+    private val _isChatLocked = MutableStateFlow(false)
+    val isChatLocked: StateFlow<Boolean> = _isChatLocked
+
     private val _showDebugBar = MutableStateFlow(store.getShowDebugBar())
     val showDebugBar: StateFlow<Boolean> = _showDebugBar
 
@@ -672,6 +684,10 @@ class OBSViewModel(app: Application) : AndroidViewModel(app) {
     fun setAnimatedEmotes(enabled: Boolean) { store.setAnimatedEmotes(enabled); _animatedEmotes.value = enabled }
     fun setShowMessageTime(enabled: Boolean) { store.setShowMessageTime(enabled); _showMessageTime.value = enabled }
     fun setShowExpandButton(enabled: Boolean) { store.setShowExpandButton(enabled); _showExpandButton.value = enabled }
+    fun setShowFullScreenButton(enabled: Boolean) { store.setShowFullScreenButton(enabled); _showFullScreenButton.value = enabled }
+    fun setShowScreenLockButton(enabled: Boolean) { store.setShowScreenLockButton(enabled); _showScreenLockButton.value = enabled }
+    fun setFullScreenActive(active: Boolean) { store.setFullScreenActive(active); _fullScreenActive.value = active }
+    fun setIsChatLocked(locked: Boolean) { _isChatLocked.value = locked }
     fun setShowDebugBar(enabled: Boolean) { store.setShowDebugBar(enabled); _showDebugBar.value = enabled }
     fun setShowEmoteDebug(enabled: Boolean) { store.setShowEmoteDebug(enabled); _showEmoteDebug.value = enabled }
     fun setShowMiniMixer(enabled: Boolean) { store.setShowMiniMixer(enabled); _showMiniMixer.value = enabled }
@@ -727,6 +743,9 @@ class OBSViewModel(app: Application) : AndroidViewModel(app) {
                         _animatedEmotes.value = store.getAnimatedEmotes()
                         _showMessageTime.value = store.getShowMessageTime()
                         _showExpandButton.value = store.getShowExpandButton()
+                        _showFullScreenButton.value = store.getShowFullScreenButton()
+                        _showScreenLockButton.value = store.getShowScreenLockButton()
+                        _fullScreenActive.value = store.getFullScreenActive()
                         _showDebugBar.value = store.getShowDebugBar()
                         _enable7tv.value = store.getEnable7tv()
                         _enableBttv.value = store.getEnableBttv()

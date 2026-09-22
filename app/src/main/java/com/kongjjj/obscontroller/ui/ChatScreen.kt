@@ -1,5 +1,6 @@
 package com.kongjjj.obscontroller.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -12,7 +13,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloseFullscreen
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -64,13 +69,19 @@ fun ChatScreen(
     animatedEmotes: Boolean,
     showMessageTime: Boolean,
     showExpandButton: Boolean,
+    showFullScreenButton: Boolean,
+    showScreenLockButton: Boolean,
+    fullScreenActive: Boolean,
+    isChatLocked: Boolean,
     showDebugBar: Boolean,
     showEmoteDebug: Boolean,
     viewerCount: Int?,
     youtubeViewerCount: Int?,
     streamUptime: String,
     streamCategory: String?,
-    onConnect: () -> Unit
+    onConnect: () -> Unit,
+    onToggleFullScreen: () -> Unit,
+    onToggleChatLock: () -> Unit
 ) {
     val listState = rememberLazyListState()
 
@@ -299,28 +310,101 @@ fun ChatScreen(
                     }
                 }
 
-                if (showExpandButton) {
-                    val scope = rememberCoroutineScope()
-                    IconButton(
-                        onClick = {
-                            scope.launch {
-                                listState.scrollToItem(combinedMessages.size - 1)
+                // Interaction blocker when locked
+                if (isChatLocked) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectTapGestures { /* consume */ }
                             }
-                        },
+                    )
+                }
+
+                if (showExpandButton || showFullScreenButton || showScreenLockButton) {
+                    val scope = rememberCoroutineScope()
+                    Column(
                         modifier = Modifier
                             .align(Alignment.TopEnd)
-                            .padding(16.dp)
-                            .size(40.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
-                                shape = RoundedCornerShape(4.dp)
-                            )
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.ExpandMore,
-                            contentDescription = "Jump to latest",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        if (showFullScreenButton) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                    .pointerInput(Unit) {
+                                        detectTapGestures(onTap = { onToggleFullScreen() })
+                                    }
+                            ) {
+                                Icon(
+                                    imageVector = if (fullScreenActive) Icons.Default.CloseFullscreen else Icons.Default.Fullscreen,
+                                    contentDescription = "Toggle Fullscreen",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+
+                        if (showScreenLockButton) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                    .pointerInput(Unit) {
+                                        detectTapGestures(
+                                            onDoubleTap = {
+                                                onToggleChatLock()
+                                            },
+                                            onTap = {
+                                                Toast.makeText(context, "Double-click圖示以啟動及解除鎖定", Toast.LENGTH_SHORT).show()
+                                            }
+                                        )
+                                    }
+                            ) {
+                                Icon(
+                                    imageVector = if (isChatLocked) Icons.Default.Lock else Icons.Default.LockOpen,
+                                    contentDescription = "Toggle Lock",
+                                    tint = if (isChatLocked) MaterialTheme.colorScheme.primary else Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+
+                        if (showExpandButton) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                    .pointerInput(Unit) {
+                                        detectTapGestures(onTap = {
+                                            scope.launch {
+                                                listState.scrollToItem(combinedMessages.size - 1)
+                                            }
+                                        })
+                                    }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.ExpandMore,
+                                    contentDescription = "Jump to latest",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

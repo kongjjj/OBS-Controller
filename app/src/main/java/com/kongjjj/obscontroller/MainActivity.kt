@@ -1,6 +1,8 @@
 package com.kongjjj.obscontroller
 
+import android.Manifest
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -20,8 +22,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kongjjj.obscontroller.ui.AudioScreen
 import com.kongjjj.obscontroller.ui.ChatScreen
@@ -37,8 +42,8 @@ class MainActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         // Request notification permission for Android 13+
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 101)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101)
         }
 
         enableEdgeToEdge()
@@ -70,7 +75,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val state by vm.state.collectAsState()
     val scenes by vm.scenes.collectAsState()
     val currentScene by vm.currentScene.collectAsState()
@@ -124,11 +129,32 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
     val ttsLanguage by vm.ttsLanguage.collectAsState()
     val showMessageTime by vm.showMessageTime.collectAsState()
     val showExpandButton by vm.showExpandButton.collectAsState()
+    val showFullScreenButton by vm.showFullScreenButton.collectAsState()
+    val showScreenLockButton by vm.showScreenLockButton.collectAsState()
+    val fullScreenActive by vm.fullScreenActive.collectAsState()
+    val isChatLocked by vm.isChatLocked.collectAsState()
 
     val isConnected = state is ConnectionState.Connected
     var selectedTab by remember { mutableIntStateOf(0) }
     var showSettings by remember { mutableStateOf(false) }
     var showExitConfirmation by remember { mutableStateOf(false) }
+
+    // Handle System Bars (Status & Navigation) visibility for Full Screen mode
+    val activity = context as? Activity
+    val window = activity?.window
+    if (window != null) {
+        val controller = remember(window) { WindowInsetsControllerCompat(window, window.decorView) }
+        LaunchedEffect(fullScreenActive, selectedTab) {
+            if (fullScreenActive && selectedTab == 2) {
+                // Hide system bars
+                controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.hide(WindowInsetsCompat.Type.systemBars())
+            } else {
+                // Show system bars
+                controller.show(WindowInsetsCompat.Type.systemBars())
+            }
+        }
+    }
 
     if (showExitConfirmation) {
         AlertDialog(
@@ -169,6 +195,8 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
             animatedEmotes = animatedEmotes,
             showMessageTime = showMessageTime,
             showExpandButton = showExpandButton,
+            showFullScreenButton = showFullScreenButton,
+            showScreenLockButton = showScreenLockButton,
             showDebugBar = showDebugBar,
             showEmoteDebug = showEmoteDebug,
             enable7tv = enable7tv,
@@ -183,6 +211,8 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
             onAnimatedEmotesChange = { vm.setAnimatedEmotes(it) },
             onShowMessageTimeChange = { vm.setShowMessageTime(it) },
             onShowExpandButtonChange = { vm.setShowExpandButton(it) },
+            onShowFullScreenButtonChange = { vm.setShowFullScreenButton(it) },
+            onShowScreenLockButtonChange = { vm.setShowScreenLockButton(it) },
             onShowDebugBarChange = { vm.setShowDebugBar(it) },
             onShowEmoteDebugChange = { vm.setShowEmoteDebug(it) },
             onEnable7tvChange = { vm.setEnable7tv(it) },
@@ -213,91 +243,93 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // "OBS Controller" button (Leftmost)
-                        val obsButtonColor = if (selectedTab != 2) MaterialTheme.colorScheme.primary 
-                                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        OutlinedButton(
-                            onClick = { selectedTab = 0 },
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = obsButtonColor
-                            ),
-                            border = BorderStroke(
-                                1.dp, 
-                                (if (selectedTab != 2) MaterialTheme.colorScheme.primary 
-                                 else MaterialTheme.colorScheme.onSurfaceVariant).copy(alpha = 0.5f)
-                            ),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                            modifier = Modifier.height(32.dp)
+            if (!fullScreenActive || selectedTab != 2) {
+                TopAppBar(
+                    title = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_obs),
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = obsButtonColor
-                            )
-                            Spacer(Modifier.width(3.dp))
-                            Text("OBS控制器", style = MaterialTheme.typography.labelMedium)
-                        }
+                            // "OBS Controller" button (Leftmost)
+                            val obsButtonColor = if (selectedTab != 2) MaterialTheme.colorScheme.primary 
+                                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            OutlinedButton(
+                                onClick = { selectedTab = 0 },
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = obsButtonColor
+                                ),
+                                border = BorderStroke(
+                                    1.dp, 
+                                    (if (selectedTab != 2) MaterialTheme.colorScheme.primary 
+                                     else MaterialTheme.colorScheme.onSurfaceVariant).copy(alpha = 0.5f)
+                                ),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                                modifier = Modifier.height(32.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_obs),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = obsButtonColor
+                                )
+                                Spacer(Modifier.width(3.dp))
+                                Text("OBS控制器", style = MaterialTheme.typography.labelMedium)
+                            }
 
-                        // "Chat" button
-                        OutlinedButton(
-                            onClick = { selectedTab = 2 },
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = if (selectedTab == 2) MaterialTheme.colorScheme.secondary 
-                                              else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                            ),
-                            border = BorderStroke(
-                                1.dp, 
-                                (if (selectedTab == 2) MaterialTheme.colorScheme.secondary 
-                                 else MaterialTheme.colorScheme.onSurfaceVariant).copy(alpha = 0.5f)
-                            ),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                            modifier = Modifier.height(32.dp)
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = null, modifier = Modifier.size(14.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("聊天室", style = MaterialTheme.typography.labelMedium)
+                            // "Chat" button
+                            OutlinedButton(
+                                onClick = { selectedTab = 2 },
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = if (selectedTab == 2) MaterialTheme.colorScheme.secondary 
+                                                  else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                ),
+                                border = BorderStroke(
+                                    1.dp, 
+                                    (if (selectedTab == 2) MaterialTheme.colorScheme.secondary 
+                                     else MaterialTheme.colorScheme.onSurfaceVariant).copy(alpha = 0.5f)
+                                ),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                                modifier = Modifier.height(32.dp)
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("聊天室", style = MaterialTheme.typography.labelMedium)
+                            }
                         }
-                    }
-                },
-                actions = {
-                    // "Disconnect" button only if connected
-                    if (isConnected) {
-                        OutlinedButton(
-                            onClick = { vm.disconnect() },
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
-                            border = BorderStroke(1.dp, Color.Red.copy(alpha = 0.5f)),
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-                            modifier = Modifier.height(32.dp)
-                        ) {
-                            Icon(Icons.Default.WifiOff, contentDescription = "Disconnect", modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("斷開OBS", style = MaterialTheme.typography.labelMedium)
+                    },
+                    actions = {
+                        // "Disconnect" button only if connected
+                        if (isConnected) {
+                            OutlinedButton(
+                                onClick = { vm.disconnect() },
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red),
+                                border = BorderStroke(1.dp, Color.Red.copy(alpha = 0.5f)),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                                modifier = Modifier.height(32.dp)
+                            ) {
+                                Icon(Icons.Default.WifiOff, contentDescription = "Disconnect", modifier = Modifier.size(16.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text("斷開OBS", style = MaterialTheme.typography.labelMedium)
+                            }
                         }
-                    }
-                    
-                    // Settings icon (Rightmost)
-                    IconButton(onClick = { showSettings = true }) {
-                        Icon(
-                            Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                        
+                        // Settings icon (Rightmost)
+                        IconButton(onClick = { showSettings = true }) {
+                            Icon(
+                                Icons.Default.Settings,
+                                contentDescription = "Settings",
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
                 )
-            )
+            }
         },
         bottomBar = {
-            if (isConnected && selectedTab != 2) {
+            if (isConnected && selectedTab != 2 && !fullScreenActive) {
                 NavigationBar {
                     NavigationBarItem(
                         selected = selectedTab == 0,
@@ -408,13 +440,19 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
                         animatedEmotes = animatedEmotes,
                         showMessageTime = showMessageTime,
                         showExpandButton = showExpandButton,
+                        showFullScreenButton = showFullScreenButton,
+                        showScreenLockButton = showScreenLockButton,
+                        fullScreenActive = fullScreenActive,
+                        isChatLocked = isChatLocked,
                         showDebugBar = showDebugBar,
                         showEmoteDebug = showEmoteDebug,
                         viewerCount = twitchViewerCount,
                         youtubeViewerCount = youtubeViewerCount,
                         streamUptime = streamUptime,
                         streamCategory = streamCategory,
-                        onConnect = { vm.connectTwitchChat() }
+                        onConnect = { vm.connectTwitchChat() },
+                        onToggleFullScreen = { vm.setFullScreenActive(!fullScreenActive) },
+                        onToggleChatLock = { vm.setIsChatLocked(!isChatLocked) }
                     )
                 }
             }

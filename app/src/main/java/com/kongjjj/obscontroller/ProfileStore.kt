@@ -55,10 +55,10 @@ class ProfileStore(context: Context) {
     fun getChatUsernameSize(): Float = prefs.getFloat("chat_username_size", DEFAULT_USERNAME_SIZE)
     fun setChatUsernameSize(sp: Float) = prefs.edit { putFloat("chat_username_size", sp) }
 
-    fun getShowDebugBar(): Boolean = prefs.getBoolean("show_debug_bar", false)
+    fun getShowDebugBar(): Boolean = prefs.getBoolean("show_debug_bar", true)
     fun setShowDebugBar(enabled: Boolean) = prefs.edit { putBoolean("show_debug_bar", enabled) }
 
-    fun getShowEmoteDebug(): Boolean = prefs.getBoolean("show_emote_debug", true)
+    fun getShowEmoteDebug(): Boolean = prefs.getBoolean("show_emote_debug", false)
     fun setShowEmoteDebug(enabled: Boolean) = prefs.edit { putBoolean("show_emote_debug", enabled) }
 
     fun getEnable7tv(): Boolean = prefs.getBoolean("enable_7tv", true)
@@ -78,6 +78,15 @@ class ProfileStore(context: Context) {
 
     fun getShowExpandButton(): Boolean = prefs.getBoolean("show_expand_button", true)
     fun setShowExpandButton(enabled: Boolean) = prefs.edit { putBoolean("show_expand_button", enabled) }
+
+    fun getShowFullScreenButton(): Boolean = prefs.getBoolean("show_fullscreen_button", true)
+    fun setShowFullScreenButton(enabled: Boolean) = prefs.edit { putBoolean("show_fullscreen_button", enabled) }
+
+    fun getShowScreenLockButton(): Boolean = prefs.getBoolean("show_screen_lock_button", true)
+    fun setShowScreenLockButton(enabled: Boolean) = prefs.edit { putBoolean("show_screen_lock_button", enabled) }
+
+    fun getFullScreenActive(): Boolean = prefs.getBoolean("fullscreen_active", false)
+    fun setFullScreenActive(active: Boolean) = prefs.edit { putBoolean("fullscreen_active", active) }
 
     fun getFilterMiniMixerByScene(): Boolean = prefs.getBoolean("filter_mini_mixer_by_scene", false)
     fun setFilterMiniMixerByScene(enabled: Boolean) = prefs.edit { putBoolean("filter_mini_mixer_by_scene", enabled) }
