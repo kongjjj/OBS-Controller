@@ -331,6 +331,9 @@ class OBSViewModel(app: Application) : AndroidViewModel(app) {
     private val _ttsEnabled = MutableStateFlow(store.getTtsEnabled())
     val ttsEnabled: StateFlow<Boolean> = _ttsEnabled
 
+    private val _ttsSubBitsOnly = MutableStateFlow(store.getTtsSubBitsOnly())
+    val ttsSubBitsOnly: StateFlow<Boolean> = _ttsSubBitsOnly
+
     private val _ttsIgnoreSender = MutableStateFlow(store.getTtsIgnoreSender())
     val ttsIgnoreSender: StateFlow<Boolean> = _ttsIgnoreSender
 
@@ -423,6 +426,16 @@ class OBSViewModel(app: Application) : AndroidViewModel(app) {
                 val now = System.currentTimeMillis()
                 val msgTs = lastMsg.timestamp ?: now
                 if (now - msgTs > 10_000) return@collect // Ignore if older than 10 seconds
+
+                if (_ttsSubBitsOnly.value) {
+                    val isTwitch = lastMsg.platform == "twitch"
+                    val isBits = isTwitch && lastMsg.bits > 0
+                    val isSub = isTwitch && (
+                        lastMsg.twitchMsgId in SUB_TWITCH_MSG_IDS ||
+                        (lastMsg.type == MessageType.USER_NOTICE && lastMsg.twitchMsgId?.contains("sub", ignoreCase = true) == true)
+                    )
+                    if (!isBits && !isSub) return@collect
+                }
 
                 var speakText = lastMsg.message
                 
@@ -696,6 +709,7 @@ class OBSViewModel(app: Application) : AndroidViewModel(app) {
     fun setShowCollectionChip(enabled: Boolean) { store.setShowCollectionChip(enabled); _showCollectionChip.value = enabled }
 
     fun setTtsEnabled(enabled: Boolean) { store.setTtsEnabled(enabled); _ttsEnabled.value = enabled }
+    fun setTtsSubBitsOnly(enabled: Boolean) { store.setTtsSubBitsOnly(enabled); _ttsSubBitsOnly.value = enabled }
     fun setTtsIgnoreSender(ignore: Boolean) { store.setTtsIgnoreSender(ignore); _ttsIgnoreSender.value = ignore }
     fun setTtsIgnoreLinks(ignore: Boolean) { store.setTtsIgnoreLinks(ignore); _ttsIgnoreLinks.value = ignore }
     fun setTtsIgnoreEmotes(ignore: Boolean) { store.setTtsIgnoreEmotes(ignore); _ttsIgnoreEmotes.value = ignore }
@@ -756,6 +770,7 @@ class OBSViewModel(app: Application) : AndroidViewModel(app) {
                         _showCollectionChip.value = store.getShowCollectionChip()
                         _showEmoteDebug.value = store.getShowEmoteDebug()
                         _ttsEnabled.value = store.getTtsEnabled()
+                        _ttsSubBitsOnly.value = store.getTtsSubBitsOnly()
                         _ttsIgnoreSender.value = store.getTtsIgnoreSender()
                         _ttsIgnoreLinks.value = store.getTtsIgnoreLinks()
                         _ttsIgnoreEmotes.value = store.getTtsIgnoreEmotes()

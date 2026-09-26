@@ -2,6 +2,8 @@ package com.kongjjj.obscontroller.ui
 
 import android.app.Activity
 import android.widget.Toast
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -70,11 +72,13 @@ fun SettingsDialog(
     onFilterMainMixerBySceneChange: (Boolean) -> Unit,
     onShowCollectionChipChange: (Boolean) -> Unit,
     ttsEnabled: Boolean,
+    ttsSubBitsOnly: Boolean,
     ttsIgnoreSender: Boolean,
     ttsIgnoreLinks: Boolean,
     ttsIgnoreEmotes: Boolean,
     ttsLanguage: String,
     onTtsEnabledChange: (Boolean) -> Unit,
+    onTtsSubBitsOnlyChange: (Boolean) -> Unit,
     onTtsIgnoreSenderChange: (Boolean) -> Unit,
     onTtsIgnoreLinksChange: (Boolean) -> Unit,
     onTtsIgnoreEmotesChange: (Boolean) -> Unit,
@@ -101,10 +105,27 @@ fun SettingsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("設定") },
+        modifier = Modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null
+        ) { hideKeyboard() },
+        title = {
+            Text(
+                "設定",
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { hideKeyboard() }
+            )
+        },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { hideKeyboard() },
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
 
@@ -585,6 +606,20 @@ fun SettingsDialog(
                                 }
                             }
                         }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
+                            Text("僅朗讀Twitch訂閱與小奇點留言", style = MaterialTheme.typography.bodyMedium)
+                            Text("開啟後只朗讀 Twitch 觀眾訂閱及贈送小奇點後的留言（不朗讀通知與普通留言）",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                        }
+                        Switch(checked = ttsSubBitsOnly, onCheckedChange = onTtsSubBitsOnlyChange)
                     }
 
                     Row(

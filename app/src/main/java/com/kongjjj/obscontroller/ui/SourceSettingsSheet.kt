@@ -1,5 +1,8 @@
 package com.kongjjj.obscontroller.ui
 
+import android.app.Activity
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
@@ -10,9 +13,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import kotlin.math.roundToInt
 
 val CONFIGURABLE_SOURCE_KINDS = setOf("browser_source", "ffmpeg_source")
@@ -28,6 +37,20 @@ fun SourceSettingsSheet(
     onSetSettings: (Map<String, Any>) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val view = LocalView.current
+
+    fun hideKeyboard() {
+        focusManager.clearFocus()
+        keyboardController?.hide()
+        val window = (context as? Activity)?.window
+        if (window != null) {
+            WindowCompat.getInsetsController(window, view).hide(WindowInsetsCompat.Type.ime())
+        }
+    }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         modifier = Modifier.fillMaxHeight(0.85f)
@@ -36,6 +59,10 @@ fun SourceSettingsSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { hideKeyboard() }
         ) {
             Text(
                 text = "Settings — $sourceName",

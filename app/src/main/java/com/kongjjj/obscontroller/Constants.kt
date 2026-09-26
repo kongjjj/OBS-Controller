@@ -16,6 +16,11 @@ internal const val SCREENSHOT_POLL_MS  = 1_500L
 
 // ── Chat ──────────────────────────────────────────────────────────────────────
 internal const val MAX_CHAT_MESSAGES = 300
+internal val SUB_TWITCH_MSG_IDS = setOf(
+    "sub", "resub", "subgift", "anonsubgift", "submysterygift",
+    "giftpaidupgrade", "primepaidupgrade", "communitypayforward",
+    "standardpayforward", "extendsub"
+)
 
 // ── Chat display defaults ─────────────────────────────────────────────────────
 internal const val DEFAULT_FONT_SIZE     = 13f

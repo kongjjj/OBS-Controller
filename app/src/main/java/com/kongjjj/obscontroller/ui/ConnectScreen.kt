@@ -1,9 +1,12 @@
 package com.kongjjj.obscontroller.ui
 
+import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -14,11 +17,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.kongjjj.obscontroller.ConnectionState
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
@@ -109,9 +118,27 @@ fun ConnectScreen(
         )
     }
 
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val view = LocalView.current
+
+    fun hideKeyboard() {
+        focusManager.clearFocus()
+        keyboardController?.hide()
+        val window = (context as? Activity)?.window
+        if (window != null) {
+            WindowCompat.getInsetsController(window, view).hide(WindowInsetsCompat.Type.ime())
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { hideKeyboard() }
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),

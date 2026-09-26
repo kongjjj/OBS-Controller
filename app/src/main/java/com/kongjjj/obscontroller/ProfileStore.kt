@@ -100,6 +100,9 @@ class ProfileStore(context: Context) {
     fun getTtsEnabled(): Boolean = prefs.getBoolean("tts_enabled", false)
     fun setTtsEnabled(enabled: Boolean) = prefs.edit { putBoolean("tts_enabled", enabled) }
 
+    fun getTtsSubBitsOnly(): Boolean = prefs.getBoolean("tts_sub_bits_only", false)
+    fun setTtsSubBitsOnly(enabled: Boolean) = prefs.edit { putBoolean("tts_sub_bits_only", enabled) }
+
     fun getTtsIgnoreSender(): Boolean = prefs.getBoolean("tts_ignore_sender", false)
     fun setTtsIgnoreSender(ignore: Boolean) = prefs.edit { putBoolean("tts_ignore_sender", ignore) }
 

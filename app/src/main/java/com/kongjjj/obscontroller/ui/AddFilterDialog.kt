@@ -1,6 +1,8 @@
 package com.kongjjj.obscontroller.ui
 
+import android.app.Activity
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -8,6 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.compose.ui.unit.dp
 
 data class FilterTypeEntry(val label: String, val kind: String)
@@ -37,15 +45,46 @@ fun AddFilterDialog(
     onAdd: (filterName: String, filterKind: String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val view = LocalView.current
+
+    fun hideKeyboard() {
+        focusManager.clearFocus()
+        keyboardController?.hide()
+        val window = (context as? Activity)?.window
+        if (window != null) {
+            WindowCompat.getInsetsController(window, view).hide(WindowInsetsCompat.Type.ime())
+        }
+    }
+
     var filterName by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf(filterTypes.first()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title) },
+        modifier = Modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null
+        ) { hideKeyboard() },
+        title = {
+            Text(
+                title,
+                modifier = Modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { hideKeyboard() }
+            )
+        },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { hideKeyboard() },
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedTextField(

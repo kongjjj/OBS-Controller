@@ -31,11 +31,12 @@ fun ChatMessage.getLocalizedSystemMessage(): String {
     if ((platform != "twitch" || type != MessageType.USER_NOTICE)) return raw
 
     val tags = msgParams
-    val user = username
+    val user = if (username == "AnAnonymousGifter") "有匿名贈禮人" else username
     
     val months = tags["msg-param-cumulative-months"] ?: tags["msg-param-months"] ?: "1"
     val recipient = tags["msg-param-recipient-display-name"] ?: tags["msg-param-recipient-user-name"] ?: "某人"
-    val sender = tags["msg-param-sender-display-name"] ?: tags["msg-param-sender-login"] ?: "某人"
+    val senderRaw = tags["msg-param-sender-display-name"] ?: tags["msg-param-sender-login"] ?: "某人"
+    val sender = if (senderRaw == "AnAnonymousGifter") "有匿名贈禮人" else senderRaw
     val viewCount = tags["msg-param-viewerCount"] ?: "0"
     val ritualName = tags["msg-param-ritual-name"]
     val massGiftCount = tags["msg-param-mass-gift-count"] ?: "0"
@@ -47,9 +48,9 @@ fun ChatMessage.getLocalizedSystemMessage(): String {
 
     return when (twitchMsgId) {
         "sub" -> "$user 使用 $tier 訂閱了頻道！"
-        "resub" -> "$user 已訂閱 $tier。這位使用者已經訂閱了 $months 個月！"
-        "subgift" -> "$user 贈送了 $tier 訂閱給 $recipient！"
-        "anonsubgift" -> "匿名贊助者 贈送了 $tier 訂閱給 $recipient！"
+        "resub" -> "$user 已使用 $tier 訂閱。這位使用者已經訂閱了 $months 個月！"
+        "subgift" -> "$user 送了一份 $tier 訂閱給 $recipient！"
+        "anonsubgift" -> "匿名贊助者 送了一份 $tier 訂閱給 $recipient！"
         "submysterygift" -> "$user 在頻道社群隨機贈送了 $massGiftCount 個 $tier 訂閱！"
         "giftpaidupgrade" -> "$user 延續了由 $sender 贈送的訂閱！"
         "primepaidupgrade" -> "$user 延續了由 Prime 贈送的訂閱！"

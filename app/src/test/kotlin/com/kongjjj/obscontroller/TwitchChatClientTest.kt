@@ -1,5 +1,6 @@
 package com.kongjjj.obscontroller
 
+import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -58,7 +59,7 @@ class TwitchChatClientTest {
         assertEquals("Resubber subscribed with Prime. They've subscribed for 6 months!", msg?.systemMsg)
         
         val localized = msg?.getLocalizedSystemMessage()
-        assertEquals("Resubber 已訂閱 Prime。這位使用者已經訂閱了 6 個月！", localized)
+        assertEquals("Resubber 已使用 Prime 訂閱。這位使用者已經訂閱了 6 個月！", localized)
     }
 
     @Test
@@ -79,5 +80,39 @@ class TwitchChatClientTest {
         assertNotNull(msg)
         assertEquals("Slachy", msg?.username)
         assertEquals("Hello world!", msg?.message)
+    }
+
+    @Test
+    fun testParseBitsMessage() {
+        val line = "@bits=100;color=#00FF7F;display-name=Cheerer;id=bits123;tmi-sent-ts=1700000000000 :cheerer!cheerer@tmi.twitch.tv PRIVMSG #channel :Cheer100 keep up the great work!"
+        val msg = client.parseTwitchIrcLine(line)
+
+        assertNotNull(msg)
+        assertEquals("Cheerer", msg?.username)
+        assertEquals("Cheer100 keep up the great work!", msg?.message)
+        assertEquals(100, msg?.bits)
+    }
+
+    @Test
+    fun testSubAndBitsFilteringLogic() {
+        val normalMsg = ChatMessage(id = "1", username = "User1", message = "Hi", platform = "twitch", bits = 0)
+        val bitsMsg = ChatMessage(id = "2", username = "User2", message = "Cheer100 Hi", platform = "twitch", bits = 100)
+        val subMsgNoComment = ChatMessage(id = "3", username = "User3", message = "", platform = "twitch", type = MessageType.USER_NOTICE, twitchMsgId = "sub")
+        val subMsgWithComment = ChatMessage(id = "4", username = "User4", message = "Love the stream!", platform = "twitch", type = MessageType.USER_NOTICE, twitchMsgId = "resub")
+
+        fun isSubOrBits(lastMsg: ChatMessage): Boolean {
+            val isTwitch = lastMsg.platform == "twitch"
+            val isBits = isTwitch && lastMsg.bits > 0
+            val isSub = isTwitch && (
+                lastMsg.twitchMsgId in SUB_TWITCH_MSG_IDS ||
+                (lastMsg.type == MessageType.USER_NOTICE && lastMsg.twitchMsgId?.contains("sub", ignoreCase = true) == true)
+            )
+            return isBits || isSub
+        }
+
+        Assert.assertFalse(isSubOrBits(normalMsg))
+        Assert.assertTrue(isSubOrBits(bitsMsg))
+        Assert.assertTrue(isSubOrBits(subMsgNoComment))
+        Assert.assertTrue(isSubOrBits(subMsgWithComment))
     }
 }

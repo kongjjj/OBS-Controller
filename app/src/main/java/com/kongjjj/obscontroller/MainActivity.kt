@@ -10,6 +10,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
@@ -23,8 +25,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -123,6 +129,7 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
     val filterMiniMixerByScene by vm.filterMiniMixerByScene.collectAsState()
     val showCollectionChip by vm.showCollectionChip.collectAsState()
     val ttsEnabled by vm.ttsEnabled.collectAsState()
+    val ttsSubBitsOnly by vm.ttsSubBitsOnly.collectAsState()
     val ttsIgnoreSender by vm.ttsIgnoreSender.collectAsState()
     val ttsIgnoreLinks by vm.ttsIgnoreLinks.collectAsState()
     val ttsIgnoreEmotes by vm.ttsIgnoreEmotes.collectAsState()
@@ -227,11 +234,13 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
             onFilterMainMixerBySceneChange = { vm.setFilterMainMixerByScene(it) },
             onShowCollectionChipChange = { vm.setShowCollectionChip(it) },
             ttsEnabled = ttsEnabled,
+            ttsSubBitsOnly = ttsSubBitsOnly,
             ttsIgnoreSender = ttsIgnoreSender,
             ttsIgnoreLinks = ttsIgnoreLinks,
             ttsIgnoreEmotes = ttsIgnoreEmotes,
             ttsLanguage = ttsLanguage,
             onTtsEnabledChange = { vm.setTtsEnabled(it) },
+            onTtsSubBitsOnlyChange = { vm.setTtsSubBitsOnly(it) },
             onTtsIgnoreSenderChange = { vm.setTtsIgnoreSender(it) },
             onTtsIgnoreLinksChange = { vm.setTtsIgnoreLinks(it) },
             onTtsIgnoreEmotesChange = { vm.setTtsIgnoreEmotes(it) },
@@ -241,7 +250,24 @@ fun OBSControllerApp(vm: OBSViewModel = viewModel()) {
     }
 
 
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val view = LocalView.current
+
+    fun hideKeyboard() {
+        focusManager.clearFocus()
+        keyboardController?.hide()
+        val window = (context as? Activity)?.window
+        if (window != null) {
+            WindowCompat.getInsetsController(window, view).hide(WindowInsetsCompat.Type.ime())
+        }
+    }
+
     Scaffold(
+        modifier = Modifier.clickable(
+            interactionSource = remember { MutableInteractionSource() },
+            indication = null
+        ) { hideKeyboard() },
         topBar = {
             if (!fullScreenActive || selectedTab != 2) {
                 TopAppBar(
